@@ -962,9 +962,14 @@
 
         <form class="wedding-form" id="weddingForm">
           <div class="form-group fade-in-element">
-            <p class="question-text">1. Планируете ли вы присутствовать?</p>
+            <p class="question-text">1. Ваше имя и фамилия</p>
+            <input type="text" id="guestName" name="guest-name" class="form-input" placeholder="Введите ваше имя и фамилию" required>
+          </div>
+
+          <div class="form-group fade-in-element">
+            <p class="question-text">2. Сможете ли Вы присутствовать на торжестве?</p>
             <label class="radio-label">
-              <input type="radio" name="attendance" value="✅ Да, с удовольствием!"> 
+              <input type="radio" name="attendance" value="✅ Да, с удовольствием!" checked> 
               <span class="custom-radio"></span> Да, с удовольствием!
             </label>
             <label class="radio-label">
@@ -974,8 +979,8 @@
           </div>
 
           <div class="form-group fade-in-element">
-            <p class="question-text">2. Вы будете одни или с парой?</p>
-            <textarea id="plusOne" name="plus-one" class="form-input" placeholder="Напишите, с кем будете..."></textarea>
+            <p class="question-text">3. С кем Вы планируете прийти? Укажите имя и фамилию</p>
+            <input type="text" id="plusOne" name="plus-one" class="form-input" placeholder="Имя и фамилия спутника (если один — оставьте пустым)">
           </div>
 
           <button type="submit" class="submit-button fade-in-element">Отправить</button>
@@ -1095,11 +1100,16 @@
 
   document.getElementById('weddingForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    var guestName  = document.getElementById('guestName').value.trim();
     var attendanceInput = document.querySelector('input[name="attendance"]:checked');
     var attendance = attendanceInput ? attendanceInput.value : '— не выбрано —';
-    var plusOne    = document.getElementById('plusOne').value.trim() || '— не указано —';
+    var plusOne    = document.getElementById('plusOne').value.trim() || '— один / одна —';
 
-    var text = '🌹 *Новый ответ на приглашение!*\n\n1️⃣ Присутствие: ' + attendance + '\n2️⃣ С кем: ' + plusOne;
+    var text = '🌹 *Новый ответ на приглашение!*\n\n' +
+               '1️⃣ *Имя и фамилия:* ' + guestName + '\n' +
+               '2️⃣ *Присутствие:* ' + attendance + '\n' +
+               '3️⃣ *С кем планирует прийти:* ' + plusOne;
+               
     var btn = document.querySelector('.submit-button');
     var msg = document.getElementById('formMessage');
 
@@ -1117,6 +1127,7 @@
         document.getElementById('weddingForm').querySelectorAll('.form-group').forEach(function(el){ el.style.display='none'; });
         btn.style.display = 'none';
         msg.textContent = '✨ Спасибо! Ваш ответ получен.';
+        msg.style.color  = '#5c4a3c';
         msg.style.display = 'block';
       } else {
         throw new Error(data.description || 'Ошибка Telegram');
