@@ -1116,21 +1116,29 @@
     btn.disabled = true;
     btn.textContent = 'Отправляем...';
 
-    fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text, parse_mode: 'Markdown' })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (data.ok) {
+    // Создаем массив запросов для каждого ID из CHAT_IDS
+    var requests = CHAT_IDS.map(function(chatId) {
+      return fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+      }).then(function(res) { return res.json(); });
+    });
+
+    // Ждем отправку во все чаты
+    Promise.all(requests)
+    .then(function(results) {
+      // Проверяем, чтобы хотя бы одна отправка прошла успешно
+      var hasSuccess = results.some(function(res) { return res.ok; });
+
+      if (hasSuccess) {
         document.getElementById('weddingForm').querySelectorAll('.form-group').forEach(function(el){ el.style.display='none'; });
         btn.style.display = 'none';
         msg.textContent = '✨ Спасибо! Ваш ответ получен.';
         msg.style.color  = '#5c4a3c';
         msg.style.display = 'block';
       } else {
-        throw new Error(data.description || 'Ошибка Telegram');
+        throw new Error('Не удалось отправить ни в один чат');
       }
     })
     .catch(function(err) {
